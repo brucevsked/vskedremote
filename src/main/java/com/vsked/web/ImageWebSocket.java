@@ -79,7 +79,13 @@ public class ImageWebSocket {
                 try {
                     for (Session s : sessions) {
                         try {
-                            s.getBasicRemote().sendText(GlobalObj.getImg());
+                            if(s.isOpen()){
+                                s.getBasicRemote().sendText(GlobalObj.getImg());
+                            }else {
+                                //如果会话已关闭，则从sessions中移除
+                                sessions.remove(s);
+                            }
+
                         } catch (Exception e) {
                             log.error("Error sending message: {}", e.getMessage());
                         }

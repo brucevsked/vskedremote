@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class ImageController {
+
     private static final Logger log = LoggerFactory.getLogger(ImageController.class);
 
     @ResponseBody

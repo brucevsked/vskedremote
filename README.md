@@ -2,13 +2,11 @@
 
 # java remote project by vsked
 
-单元测试时继续下面这个类是带事务管理的  
-AbstractTransactionalTestNGSpringContextTests  
-
-下面这个不带事务管理的  
-AbstractTestNGSpringContextTests  
-
 http://127.0.0.1
+setInterval循环版本
+http://127.0.0.1/index.html
+websocket实时版本
+http://127.0.0.1/index2.html
 
 
 

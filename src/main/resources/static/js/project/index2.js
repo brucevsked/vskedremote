@@ -2,7 +2,7 @@
 
 class Index2 {
 
-    baseWebsocketServerUrl = "ws://127.0.0.1:80/imageWebsocket";
+    baseWebsocketServerUrl = "ws://192.168.100.74:80/imageWebsocket";
     websocket = null;
 
     initUI() {
@@ -22,6 +22,20 @@ class Index2 {
                     this.websocket = null;
                 }
             }
+        });
+        // 添加图片点击事件监听器
+        $("#currentScreenVsk").on("click", (event) => {
+            this.handleImageClick(event);
+        });
+        // 添加双击事件监听器
+        $("#currentScreenVsk").on("dblclick", (event) => {
+            this.handleImageDoubleClick(event);
+        });
+
+        // 添加右键点击事件监听器并阻止默认菜单
+        $("#currentScreenVsk").on("contextmenu", (event) => {
+            event.preventDefault();
+            this.handleImageRightClick(event);
         });
     }
 
@@ -56,6 +70,96 @@ class Index2 {
         this.websocket.onerror = (error) => {
             console.error("WebSocket错误:", error);
         };
+    }
+
+    handleImageClick(event) {
+        const img = $("#currentScreenVsk")[0];
+        const offsetX = event.offsetX;
+        const offsetY = event.offsetY;
+        const imgWidth = img.width;
+        const imgHeight = img.height;
+
+        // 计算相对于图片的坐标比例
+        const xRatio = offsetX / imgWidth;
+        const yRatio = offsetY / imgHeight;
+
+        // 构造坐标数据对象
+        const clickData = {
+            type: "mouseClick",
+            x: xRatio,
+            y: yRatio,
+            offsetX: offsetX,
+            offsetY: offsetY,
+            imgWidth: imgWidth,
+            imgHeight: imgHeight
+        };
+
+        // 通过WebSocket发送坐标数据到后台
+        if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+            this.websocket.send(clickData.type+","+clickData.x+","+clickData.y);
+        } else {
+            console.warn("WebSocket未连接，无法发送点击坐标");
+        }
+    }
+
+    handleImageDoubleClick(event) {
+        const img = $("#currentScreenVsk")[0];
+        const offsetX = event.offsetX;
+        const offsetY = event.offsetY;
+        const imgWidth = img.width;
+        const imgHeight = img.height;
+
+        // 计算相对于图片的坐标比例
+        const xRatio = offsetX / imgWidth;
+        const yRatio = offsetY / imgHeight;
+
+        // 构造双击事件数据对象
+        const clickData = {
+            type: "mouseDoubleClick",
+            x: xRatio,
+            y: yRatio,
+            offsetX: offsetX,
+            offsetY: offsetY,
+            imgWidth: imgWidth,
+            imgHeight: imgHeight
+        };
+
+        // 通过WebSocket发送坐标数据到后台
+        if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+            this.websocket.send(clickData.type+","+clickData.x+","+clickData.y);
+        } else {
+            console.warn("WebSocket未连接，无法发送双击坐标");
+        }
+    }
+
+    handleImageRightClick(event) {
+        const img = $("#currentScreenVsk")[0];
+        const offsetX = event.offsetX;
+        const offsetY = event.offsetY;
+        const imgWidth = img.width;
+        const imgHeight = img.height;
+
+        // 计算相对于图片的坐标比例
+        const xRatio = offsetX / imgWidth;
+        const yRatio = offsetY / imgHeight;
+
+        // 构造右键点击事件数据对象
+        const clickData = {
+            type: "mouseRightClick",
+            x: xRatio,
+            y: yRatio,
+            offsetX: offsetX,
+            offsetY: offsetY,
+            imgWidth: imgWidth,
+            imgHeight: imgHeight
+        };
+
+        // 通过WebSocket发送坐标数据到后台
+        if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+            this.websocket.send(clickData.type+","+clickData.x+","+clickData.y);
+        } else {
+            console.warn("WebSocket未连接，无法发送右键点击坐标");
+        }
     }
 
 }

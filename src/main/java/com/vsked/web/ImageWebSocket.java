@@ -10,6 +10,7 @@ import jakarta.websocket.server.ServerEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import java.awt.event.InputEvent;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -59,6 +60,62 @@ public class ImageWebSocket {
     @OnMessage
     public void onMessage(Session session, String message) {
         log.info("Received message: {}", message);
+
+        double baseWith=GlobalObj.getRe().getWidth();
+        double baseHeight=GlobalObj.getRe().getHeight();
+
+        boolean isMouseEvent = false;
+
+        if(message.contains("mouseClick")){
+            try {
+                String[] arr=message.split(",");
+                int myX= (int) (baseWith*Double.parseDouble(arr[1]));
+                int myY= (int) (baseHeight*Double.parseDouble(arr[2]));
+                GlobalObj.getRobot().mouseMove( myX,myY);
+                GlobalObj.getRobot().mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                GlobalObj.getRobot().mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                isMouseEvent = true;
+            } catch (Exception e) {
+                log.error("Error processing mouseClick: {}", e.getMessage());
+            }
+        }
+
+        if(message.contains("mouseRightClick")){
+            try {
+                String[] arr=message.split(",");
+                int myX= (int) (baseWith*Double.parseDouble(arr[1]));
+                int myY= (int) (baseHeight*Double.parseDouble(arr[2]));
+                GlobalObj.getRobot().mouseMove(myX,myY);
+                GlobalObj.getRobot().mousePress(InputEvent.BUTTON3_DOWN_MASK);
+                GlobalObj.getRobot().mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
+                isMouseEvent = true;
+            } catch (Exception e) {
+                log.error("Error processing mouseRightClick: {}", e.getMessage());
+            }
+        }
+
+        if(message.contains("mouseDoubleClick")){
+            try {
+                String[] arr=message.split(",");
+                int myX= (int) (baseWith*Double.parseDouble(arr[1]));
+                int myY= (int) (baseHeight*Double.parseDouble(arr[2]));
+                GlobalObj.getRobot().mouseMove(myX,myY);
+                GlobalObj.getRobot().mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                GlobalObj.getRobot().mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                GlobalObj.getRobot().delay(50);  // 短暂延迟，模拟真实双击
+                GlobalObj.getRobot().mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                GlobalObj.getRobot().mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                isMouseEvent = true;
+            } catch (Exception e) {
+                log.error("Error processing mouseDoubleClick: {}", e.getMessage());
+            }
+        }
+
+        // 如果是鼠标事件，处理完后继续执行发送任务逻辑
+        if (isMouseEvent) {
+            log.info("Mouse event processed, continuing with image sending,{}",sending);
+            sending=false;
+        }
 
         // 如果已经在发送数据，则停止之前的发送任务
         if (sending) {

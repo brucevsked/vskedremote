@@ -37,6 +37,10 @@ class Index2 {
             event.preventDefault();
             this.handleImageRightClick(event);
         });
+        // 添加键盘事件监听器
+        $(document).on("keydown", (event) => {
+            this.handleKeyDown(event);
+        });
     }
 
     initWebsocketConnect(){
@@ -159,6 +163,43 @@ class Index2 {
             this.websocket.send(clickData.type+","+clickData.x+","+clickData.y);
         } else {
             console.warn("WebSocket未连接，无法发送右键点击坐标");
+        }
+    }
+
+    // 处理键盘按下事件
+    handleKeyDown(event) {
+        // 只阻止特定按键的默认行为，防止与浏览器快捷键冲突
+        // 这些按键通常在远程桌面应用中有特殊用途
+        const preventDefaultKeys = [
+            'Alt',
+            'Control',
+            'Meta',
+            'Shift',
+            'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'
+        ];
+
+        // 如果按下的键在需要阻止默认行为的列表中，则阻止默认行为
+        if (preventDefaultKeys.includes(event.key) ||
+            (event.ctrlKey && event.key !== 'F5') ||  // 阻止除F5以外的Ctrl组合键
+            (event.altKey && event.key.length === 1) || // 阻止Alt+字母组合键
+            event.key === 'ContextMenu') { // 阻止上下文菜单键
+            event.preventDefault();
+        }
+        // 构造键盘事件数据对象
+        const keyData = {
+            type: "keyDown",
+            key: event.key,
+            keyCode: event.keyCode,
+            ctrlKey: event.ctrlKey,
+            shiftKey: event.shiftKey,
+            altKey: event.altKey
+        };
+
+        // 通过WebSocket发送键盘数据到后台
+        if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+            this.websocket.send(keyData.type+","+keyData.key+","+keyData.keyCode+","+keyData.ctrlKey+","+keyData.shiftKey+","+keyData.altKey);
+        } else {
+            console.warn("WebSocket未连接，无法发送键盘按键");
         }
     }
 

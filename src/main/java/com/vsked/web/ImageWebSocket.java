@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -65,6 +66,9 @@ public class ImageWebSocket {
         double baseHeight=GlobalObj.getRe().getHeight();
 
         boolean isMouseEvent = false;
+        boolean isKeyEvent = false;
+
+        assert GlobalObj.getRobot()!=null;
 
         if(message.contains("mouseClick")){
             try {
@@ -111,9 +115,53 @@ public class ImageWebSocket {
             }
         }
 
-        // 如果是鼠标事件，处理完后继续执行发送任务逻辑
-        if (isMouseEvent) {
-            log.info("Mouse event processed, continuing with image sending,{}",sending);
+        // 处理键盘事件
+        if(message.contains("keyDown")) {
+            try {
+                String[] arr = message.split(",");
+                String key = arr[1];           // 按键字符
+                int keyCode = Integer.parseInt(arr[2]);  // 键码
+                boolean ctrlKey = Boolean.parseBoolean(arr[3]);   // Ctrl键是否按下
+                boolean shiftKey = Boolean.parseBoolean(arr[4]);  // Shift键是否按下
+                boolean altKey = Boolean.parseBoolean(arr[5]);    // Alt键是否按下
+
+                // 按下修饰键
+                if (ctrlKey) {
+                    GlobalObj.getRobot().keyPress(KeyEvent.VK_CONTROL);
+                }
+                if (shiftKey) {
+                    GlobalObj.getRobot().keyPress(KeyEvent.VK_SHIFT);
+                }
+                if (altKey) {
+                    GlobalObj.getRobot().keyPress(KeyEvent.VK_ALT);
+                }
+
+                // 按下主键
+                GlobalObj.getRobot().keyPress(keyCode);
+
+                // 释放主键
+                GlobalObj.getRobot().keyRelease(keyCode);
+
+                // 释放修饰键
+                if (ctrlKey) {
+                    GlobalObj.getRobot().keyRelease(KeyEvent.VK_CONTROL);
+                }
+                if (shiftKey) {
+                    GlobalObj.getRobot().keyRelease(KeyEvent.VK_SHIFT);
+                }
+                if (altKey) {
+                    GlobalObj.getRobot().keyRelease(KeyEvent.VK_ALT);
+                }
+
+                isKeyEvent = true;
+            } catch (Exception e) {
+                log.error("Error processing keyDown: {}", e.getMessage());
+            }
+        }
+
+        // 如果是鼠标事件或键盘事件，处理完后继续执行发送任务逻辑
+        if (isMouseEvent || isKeyEvent) {
+            log.info("Event processed, continuing with image sending,{}",sending);
             sending=false;
         }
 
